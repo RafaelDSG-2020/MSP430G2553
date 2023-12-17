@@ -11,12 +11,10 @@
 #define PIN_M1 BIT2
 #define AUX_PIN BIT4  // Assumindo que o pino AUX está conectado ao P1.4
 
-void delayEBYTE(unsigned int value) {
-  register unsigned int loops = ((F_CPU * value) >> 2);
-
-  while (loops) {
-    __delay_cycles(1);
-    loops--;
+void delayEBYTE(const unsigned long int value) {
+  for(int i = 0; i  < value; i++) {
+    i++;
+    __delay_cycles(1000);
   }
 }
 
@@ -42,6 +40,7 @@ int pinMSPRead(volatile unsigned char &port, uint8_t pin) {
 
 EBYTE Radio;
 ebyte_t *ebyte;
+
 bool initRadio() {
   bool ok = true;
 
@@ -49,6 +48,8 @@ bool initRadio() {
   ebyte->_M0 = PIN_M0;
   ebyte->_M1 = PIN_M1;
   ebyte->_AUX = AUX_PIN;
+  
+  UART_1_Start();
 
   pinMSPMode(P1DIR, ebyte->_AUX, INPUT_PIN);
   pinMSPMode(P2DIR, ebyte->_M0, OUTPUT_PIN);
