@@ -144,11 +144,19 @@ unsigned long usbTimeoutTimer = 0u;
 //   }
 // }
 
+#define PIN_M0 BIT1
+#define PIN_M1 BIT2
+#define AUX_PIN BIT4 // Assumindo que o pino AUX está conectado ao P1.4
+
 EBYTE Radio;
 
 bool initRadio()
 {
-
+  ebyte_t *ebyte;
+  ebyte->_M0 = PIN_M0;
+  ebyte->_M1 = PIN_M1;
+  ebyte->_AUX = AUX_PIN;
+  
   UART_1_Start();
   //UART_1_ENABLE_Write(1);
   //USBUART_Start(0, USBUART_3V_OPERATION);
