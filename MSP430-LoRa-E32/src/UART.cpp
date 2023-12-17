@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  UART_MSP.cpp
+ *       Filename:  UART.cpp
  *
  *    Description:  -
  *
@@ -15,14 +15,11 @@
  *
  * =====================================================================================
  */
-
-#include "UART_MSP.h"
+#include "UART.h"
 
 #define UART_RXD BIT1
 #define UART_TXD BIT2
-#define PIN_M0 BIT1
-#define PIN_M1 BIT2
-#define AUX_PIN BIT4 // Assumindo que o pino AUX está conectado ao P1.4
+
 
 uint8_t UART_1_GetRxBufferSize() {
     // Retorna o número de bytes no buffer de recepção
@@ -66,4 +63,11 @@ uint8_t UART_1_GetByte() {
     return UCA0RXBUF;
 }
 
+void UART_1_PutArray(const void *data, uint8_t size) {
+    const uint8_t *data_ptr = (const uint8_t *)data;
 
+    // Envia cada byte da matriz
+    for (uint8_t i = 0; i < size; ++i) {
+        UART_1_PutChar(data_ptr[i]);
+    }
+}

@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  UART_MSP.h
+ *       Filename:  UART.h
  *
  *    Description:  -
  *
@@ -16,8 +16,8 @@
  * =====================================================================================
  */
 
-#ifndef UART_MSP_H 
-#define UART_MSP_H
+#ifndef UART_H 
+#define UART_H
 
 
 #include <msp430.h>
@@ -26,14 +26,11 @@
 
 #include <stdio.h>
 
-#include "UART_MSP.h"
-
 uint8_t UART_1_GetRxBufferSize();
 void UART_1_ClearRxBuffer();
 void UART_1_Start();
 void UART_1_PutChar(uint8_t data);
 uint8_t UART_1_GetByte();
-
-
+void UART_1_PutArray(const void *data, uint8_t size);
 #endif
 /*****************************END OF FILE**************************************/

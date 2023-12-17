@@ -61,22 +61,16 @@
 
 */
 
-#ifndef EBYTE_H
-#define EBYTE_H
+#ifndef EBYTE_H_LIB
+#define EBYTE_H_LIB
 
-// #define EBYTE_H_LIB_VER 5.5
+#define EBYTE_H_LIB_VER 5.5
 
-// #if ARDUINO >= 100
-// #include "Arduino.h"
-// #else
-// #include "WProgram.h"
-// #endif
-
-#include <msp430.h>
-
-#include <stdint.h>
-
-#include <stdio.h>
+#if ARDUINO >= 100
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#endif
 
 // if you seem to get "corrupt settings add this line to your .ino
 // #include <avr/io.h>
@@ -93,21 +87,90 @@ if your unit will not return parameter settings.
 
 #define PIN_RECOVER 50
 
-#define USBUART_BUFFER_SIZE (64u)
-#define USB_TIMEOUT (50u)
-
 // modes NORMAL send and recieve for example
-#define MODE_NORMAL 0 // can send and recieve
-#define MODE_WAKEUP 1 // sends a preamble to waken receiver
+#define MODE_NORMAL 0    // can send and recieve
+#define MODE_WAKEUP 1    // sends a preamble to waken receiver
 #define MODE_POWERDOWN 2 // can't transmit but receive works only in wake up mode
-#define MODE_PROGRAM 3 // for programming
-
-void writeUsb64(uint8_t * buffer, uint16_t size);
-void sendUsb(char * buffer, unsigned int size);
+#define MODE_PROGRAM 3   // for programming
 
 // options to save change permanently or temp (power down and restart will restore settings to last saved options
 #define PERMANENT 0xC0
 #define TEMPORARY 0xC2
+
+// parity bit options (must be the same for transmitter and reveiver)
+#define PB_8N1 0b00 // default
+#define PB_8O1 0b01
+#define PB_8E1 0b11
+
+// UART data rates
+//  (can be different for transmitter and reveiver)
+#define UDR_1200 0b000   // 1200 baud
+#define UDR_2400 0b001   // 2400 baud
+#define UDR_4800 0b010   // 4800 baud
+#define UDR_9600 0b011   // 9600 baud default
+#define UDR_19200 0b100  // 19200 baud
+#define UDR_38400 0b101  // 34800 baud
+#define UDR_57600 0b110  // 57600 baud
+#define UDR_115200 0b111 // 115200 baud
+
+// air data rates (certian types of modules)
+// (must be the same for transmitter and reveiver)
+#define ADR_300 0b000   // 300 baud
+#define ADR_1200 0b001  // 1200 baud
+#define ADR_2400 0b010  // 2400 baud
+#define ADR_4800 0b011  // 4800 baud
+#define ADR_9600 0b100  // 9600 baud
+#define ADR_19200 0b101 // 19200 baud
+
+// air data rates (other types of modules)
+#define ADR_1K 0b000  // 1k baud
+#define ADR_2K 0b001  // 2K baud
+#define ADR_5K 0b010  // 4K baud
+#define ADR_8K 0b011  // 8K baud
+#define ADR_10K 0b100 // 10K baud
+#define ADR_15K 0b101 // 15K baud
+#define ADR_20K 0b110 // 20K baud
+#define ADR_25K 0b111 // 25K baud
+
+// various options
+// (can be different for transmitter and reveiver)
+#define OPT_FMDISABLE 0b0 // default
+#define OPT_FMENABLE 0b1
+#define OPT_IOOPENDRAIN 0b0
+#define OPT_IOPUSHPULL 0b1
+#define OPT_WAKEUP250 0b000
+#define OPT_WAKEUP500 0b001
+#define OPT_WAKEUP750 0b010
+#define OPT_WAKEUP1000 0b011
+#define OPT_WAKEUP1250 0b100
+#define OPT_WAKEUP1500 0b101
+#define OPT_WAKEUP1750 0b110
+#define OPT_WAKEUP2000 0b111
+#define OPT_FECDISABLE 0b0
+#define OPT_FECENABLE 0b1
+
+// transmitter output power--check government regulations on legal transmit power
+// refer to the data sheet as not all modules support these power levels
+// constants for 1W units
+// (can be different for transmitter and reveiver)
+// #define OPT_TP30 0b00		// 30 db
+// #define OPT_TP27 0b01		// 27 db
+// #define OPT_TP24 0b10		// 24 db
+// #define OPT_TP21 0b11		// 21 db
+
+// constants or 500 mW units
+// #define OPT_TP27 0b00		// 27 db
+// #define OPT_TP24 0b01		// 24 db
+// #define OPT_TP21 0b10		// 21 db
+// #define OPT_TP18 0b11		// 17 db
+// #define OPT_TP17 0b11		// 17 db
+
+// constants or 100 mW units
+#define OPT_TP20 0b00 // 20 db
+#define OPT_TP17 0b01 // 17 db
+#define OPT_TP14 0b10 // 14 db
+#define OPT_TP11 0b11 // 10 db
+#define OPT_TP10 0b11 // 10 db
 
 bool initRadio();
 
@@ -178,56 +241,43 @@ void BuildOptionByte();
 bool ReadModelData();
 void ClearBuffer();
 
-typedef struct ebyte_t {
-  // pin variables
+typedef struct ebyte_t
+{
+    // pin variables
 	int8_t _M0;
 	int8_t _M1;
 	int8_t _AUX;
-  // variable for the 6 bytes that are sent to the module to program it
-  // or bytes received to indicate modules programmed settings
-  uint8_t _Params[6];
+    
+    // variable for the 6 bytes that are sent to the module to program it
+    // or bytes received to indicate modules programmed settings
+    uint8_t _Params[6];
 
-  // indicidual variables for each of the 6 bytes
-  // _Params could be used as the main variable storage, but since some bytes
-  // are a collection of several options, let's just make storage consistent
-  // also Param[1] is different data depending on the _Save variable
-  uint8_t _Save;
-  uint8_t _AddressHigh;
-  uint8_t _AddressLow;
-  uint8_t _Speed;
-  uint8_t _Channel;
-  uint8_t _Options;
-  uint8_t _Attempts;
+    // indicidual variables for each of the 6 bytes
+    // _Params could be used as the main variable storage, but since some bytes
+    // are a collection of several options, let's just make storage consistent
+    // also Param[1] is different data depending on the _Save variable
+    uint8_t _Save;
+    uint8_t _AddressHigh;
+    uint8_t _AddressLow;
+    uint8_t _Speed;
+    uint8_t _Channel;
+    uint8_t _Options;
+    uint8_t _Attempts;
 
-  // individual variables for all the options
-  uint8_t _ParityBit;
-  uint8_t _UARTDataRate;
-  uint8_t _AirDataRate;
-  uint8_t _OptionTrans;
-  uint8_t _OptionPullup;
-  uint8_t _OptionWakeup;
-  uint8_t _OptionFEC;
-  uint8_t _OptionPower;
-  uint16_t _Address;
-  uint8_t _Model;
-  uint8_t _Version;
-  uint8_t _Features;
-  uint8_t _buf;
+    // individual variables for all the options
+    uint8_t _ParityBit;
+    uint8_t _UARTDataRate;
+    uint8_t _AirDataRate;
+    uint8_t _OptionTrans;
+    uint8_t _OptionPullup;
+    uint8_t _OptionWakeup;
+    uint8_t _OptionFEC;
+    uint8_t _OptionPower;
+    uint16_t _Address;
+    uint8_t _Model;
+    uint8_t _Version;
+    uint8_t _Features;
+    uint8_t _buf;
 
-}
-EBYTE;
-
-// extern unsigned long millis();
-
-typedef struct data_t {
-  // data sent and received
-  uint8_t Count;
-  uint8_t message1;
-  uint8_t message2;
-  uint8_t message3[6];
-}
-DATA;
-
-extern EBYTE Radio;
+} EBYTE;
 #endif
-/* [] END OF FILE */
