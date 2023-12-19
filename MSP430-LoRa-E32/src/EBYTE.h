@@ -61,16 +61,12 @@
 
 */
 
-#ifndef EBYTE_H_LIB
-#define EBYTE_H_LIB
+#ifndef EBYTE_H
+#define EBYTE_H
 
-#define EBYTE_H_LIB_VER 5.5
+#include <stdint.h>
+#include <stdio.h>
 
-#if ARDUINO >= 100
-#include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
 
 // if you seem to get "corrupt settings add this line to your .ino
 // #include <avr/io.h>
