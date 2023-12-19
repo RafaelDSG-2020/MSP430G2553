@@ -66,6 +66,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <msp430.h>
 
 
 // if you seem to get "corrupt settings add this line to your .ino
