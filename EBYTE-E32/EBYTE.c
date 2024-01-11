@@ -73,7 +73,7 @@ void pinMSPMode(volatile unsigned char &portDir, uint8_t pin, uint8_t mode) {
 /* Funcoes auxiliares para GPIOs
     Ex. P2.1 HIGH: pinMSPWrite(P2OUT, BIT2, HIGH_PIN);
 */
-void pinMSPWrite(volatile unsigned char &portOut, uint8_t pin, uint8_t level) {
+void pinMSPWrite(const unsigned char &portOut, uint8_t pin, uint8_t level) {
   if (level == LOW_PIN) {
     portOut &= ~(1 << pin);  // Nível baixo
   } else if (level == HIGH_PIN) {
