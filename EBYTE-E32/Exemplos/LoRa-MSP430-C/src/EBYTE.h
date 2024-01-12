@@ -53,20 +53,20 @@ char UART_receive_byte(void);
 void send_data(const char* data);
 
 /* Funcoes auxiliares para GPIOs
-    Ex. P2.1 como saida: pinMSPMode(P2DIR, BIT2, OUTPUT_PIN);
+    Ex. P2.1 como saida: pinMSPMode(&P2DIR, BIT2, OUTPUT_PIN);
 */
-void pinMSPMode(volatile unsigned char &portDir, uint8_t pin, uint8_t mode);
-
+void pinMSPMode(volatile unsigned char *port_dir, uint8_t pin, uint8_t mode);
 
 /* Funcoes auxiliares para GPIOs
-    Ex. P2.1 HIGH: pinMSPWrite(P2OUT, BIT2, HIGH_PIN);
+    Ex. P2.1 HIGH: pinMSPWrite(&P2OUT, BIT2, HIGH_PIN);
 */
-void pinMSPWrite(volatile unsigned char &portOut, uint8_t pin, uint8_t level);
+void pinMSPWrite(volatile unsigned char *port_out, uint8_t pin, uint8_t level);
 
 /* Funcoes auxiliares para GPIOs
     Ex. P2.1 verifica estado do pino: pinMSPRead(P2OUT, BIT2);
 */
-int pinMSPRead(const volatile unsigned char &port, uint8_t pin);
+int pinMSPRead(const volatile unsigned char *port_in, uint8_t pin);
+
 
 typedef struct {
 

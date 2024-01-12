@@ -67,30 +67,36 @@ void send_data(const char * data) {
 /* Funcoes auxiliares para GPIOs
     Ex. P2.1 como saida: pinMSPMode(P2DIR, BIT2, OUTPUT_PIN);
 */
-void pinMSPMode(volatile unsigned char & portDir, uint8_t pin, uint8_t mode) {
-  if (mode == INPUT_PIN) {
-    portDir &= ~(1 << pin); // Configura o pino como entrada
-  } else if (mode == OUTPUT_PIN) {
-    portDir |= (1 << pin); // Configura o pino como saída
+void pinMSPMode(volatile unsigned char *port_dir, uint8_t pin, uint8_t mode) {
+  if (mode == OUTPUT_PIN) {
+    *port_dir |= pin; // Configura o pino como saída
+  } else if (mode == INPUT_PIN) {
+    *port_dir &= ~pin; // Configura o pino como entrada
   }
 }
 
 /* Funcoes auxiliares para GPIOs
     Ex. P2.1 HIGH: pinMSPWrite(P2OUT, BIT2, HIGH_PIN);
 */
-void pinMSPWrite(volatile unsigned char & portOut, uint8_t pin, uint8_t level) {
-  if (level == LOW_PIN) {
-    portOut &= ~(1 << pin); // Nível baixo
-  } else if (level == HIGH_PIN) {
-    portOut |= (1 << pin); // Nível alto
+void pinMSPWrite(volatile unsigned char *port_out, uint8_t pin, uint8_t level) {
+  if(level == HIGH_PIN) {
+    *port_out |= pin;
+  }else if(level == LOW_PIN) {
+    *port_out &= ~pin;
   }
 }
 /* Funcoes auxiliares para GPIOs
     Ex. P2.1 verifica estado do pino: pinMSPRead(P2OUT, BIT2);
 */
-int pinMSPRead(const volatile unsigned char & port, uint8_t pin) {
-  return (port & (1 << pin)) ? HIGH_PIN : LOW_PIN;
+int pinMSPRead(const volatile unsigned char *port_in, uint8_t pin) {
+  if ((*port_in & pin)) {
+    return 1;  // O pino está em nível alto
+  } else {
+    return 0;  // O pino está em nível baixo
+  }
 }
+
+
 
 unsigned long millis2() {
   __delay_cycles(50000);
@@ -102,20 +108,20 @@ void SetMode(EBYTE * eb, uint8_t mode) {
 
   switch (mode) {
   case MODE_NORMAL:
-    pinMSPWrite(P2OUT, eb -> _M0, LOW_PIN);
-    pinMSPWrite(P2OUT, eb -> _M1, LOW_PIN);
+    pinMSPWrite(&P2OUT, eb -> _M0, LOW_PIN);
+    pinMSPWrite(&P2OUT, eb -> _M1, LOW_PIN);
     break;
   case MODE_WAKEUP:
-    pinMSPWrite(P2OUT, eb -> _M0, HIGH_PIN);
-    pinMSPWrite(P2OUT, eb -> _M1, LOW_PIN);
+    pinMSPWrite(&P2OUT, eb -> _M0, HIGH_PIN);
+    pinMSPWrite(&P2OUT, eb -> _M1, LOW_PIN);
     break;
   case MODE_POWERDOWN:
-    pinMSPWrite(P2OUT, eb -> _M0, LOW_PIN);
-    pinMSPWrite(P2OUT, eb -> _M1, HIGH_PIN);
+    pinMSPWrite(&P2OUT, eb -> _M0, LOW_PIN);
+    pinMSPWrite(&P2OUT, eb -> _M1, HIGH_PIN);
     break;
   case MODE_PROGRAM:
-    pinMSPWrite(P2OUT, eb -> _M0, HIGH_PIN);
-    pinMSPWrite(P2OUT, eb -> _M1, HIGH_PIN);
+    pinMSPWrite(&P2OUT, eb -> _M0, HIGH_PIN);
+    pinMSPWrite(&P2OUT, eb -> _M1, HIGH_PIN);
     break;
   }
 
@@ -128,9 +134,9 @@ bool EBYTE_Init(EBYTE * eb, uint8_t _Attempts) {
   eb -> _M1 = EBYTE_PIN_M1;
   eb -> _AUX = EBYTE_AUX_PIN;
 
-  pinMSPMode(P2DIR, eb -> _M0, OUTPUT_PIN); // Configura M0 como saída
-  pinMSPMode(P2DIR, eb -> _M1, OUTPUT_PIN); // Configura M1 como saída
-  pinMSPMode(P1DIR, eb -> _AUX, INPUT_PIN); // Configura AUX como entrada
+  pinMSPMode(&P2DIR, eb -> _M0, OUTPUT_PIN); // Configura M0 como saída
+  pinMSPMode(&P2DIR, eb -> _M1, OUTPUT_PIN); // Configura M1 como saída
+  pinMSPMode(&P1DIR, eb -> _AUX, INPUT_PIN); // Configura AUX como entrada
 
   __delay_cycles(1000);
 
@@ -206,7 +212,7 @@ void CompleteTask(EBYTE * eb, unsigned long timeout) {
   }
 
   if (eb -> _AUX != -1) {
-    while (pinMSPRead(P1IN, eb -> _AUX) == LOW_PIN) {
+    while (pinMSPRead(&P1IN, eb -> _AUX) == LOW_PIN) {
       __delay_cycles(PIN_RECOVER);
       if ((millis2() - t) > timeout) {
         break;
@@ -374,7 +380,7 @@ void EBYTE_BuildOptionByte(EBYTE * eb) {
 
 // Função para obter o estado do pino AUX
 bool EBYTE_GetAux(EBYTE * eb) {
-  return pinMSPRead(P1IN, eb -> _AUX); // Supondo a existência de uma função pinMSPRead
+  return pinMSPRead(&P1IN, eb -> _AUX); // Supondo a existência de uma função pinMSPRead
 }
 
 void EBYTE_SaveParameters(EBYTE * eb, uint8_t val) {
@@ -528,6 +534,7 @@ struct DATA {
 
 DATA MyData;
 
+
 int main(void) {
   WDTCTL = WDTPW + WDTHOLD; // Stop watchdog timer
   BCSCTL1 = CALBC1_1MHZ; // Set DCO to 1MHz
@@ -547,7 +554,7 @@ int main(void) {
     strcpy(MyData.message, "hello world");
 
     // Enviar a mensagem
-    EBYTE_SendStruct( & ebyte, & MyData, sizeof(MyData));
+    EBYTE_SendStruct(&ebyte, &MyData, sizeof(MyData));
 
     // Delay para evitar sobrecarga (ajuste conforme necessário)
     __delay_cycles(100000); // Ajuste esse valor conforme a necessidade
